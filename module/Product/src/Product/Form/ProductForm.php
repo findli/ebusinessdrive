@@ -1,25 +1,32 @@
 <?php
 
-namespace Applcation\Form;
+namespace Product\Form;
 
 use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
+use Zend\InputFilter\InputFilter;
+use Zend\InputFilter\InputFilterAwareInterface;
+use Zend\InputFilter\InputFilterInterface;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\Validator\Db\NoRecordExists;
 
-class ProductForm extends Form implements ServiceLocatorAwareInterface
+class ProductForm extends Form implements ServiceLocatorAwareInterface, InputFilterAwareInterface
 {
     use ServiceLocatorAwareTrait;
 
     protected $services;
+    protected $inputFilter;
 
-    function initialize() {
+    function initialize()
+    {
         $translator = $this->getServiceLocator()
-                           ->getServiceLocator()
                            ->get('MVCTranslator');
 
+        $this->add(
+            [
+                'name'    => 'id',
+                'type'    => 'hidden',
+            ]
+        );
         $this->add(
             [
                 'name'    => 'name',
@@ -41,7 +48,6 @@ class ProductForm extends Form implements ServiceLocatorAwareInterface
                 ],
             ]
         );
-
         $this->add(
             [
                 'name'       => 'submit',
@@ -53,9 +59,71 @@ class ProductForm extends Form implements ServiceLocatorAwareInterface
         );
         $this->add(
             [
-                'name' => 'security',
+                'name' => 'csrf',
                 'type' => 'Zend\Form\Element\Csrf'
             ]
         );
     }
+
+    /**
+     * @param InputFilterInterface $inputFilter
+     * @return void|static
+     * @throws \Exception
+     */
+    public function setInputFilter(InputFilterInterface $inputFilter)
+    {
+        throw new \Exception("Not used");
+    }
+    public function getInputFilter() {
+        if (!$this->inputFilter) {
+            $inputFilter = new InputFilter();
+
+            $inputFilter->add(
+                [
+                    'name'     => 'id',
+                    'required' => false,
+                    'filters'  => [
+                        ['name' => 'Int'],
+                    ],
+                ]
+            );
+
+            $inputFilter->add(
+                [
+                    'name'       => 'name',
+                    'required'   => true,
+                    'filters'    => [
+                        ['name' => 'StripTags'],
+                        ['name' => 'StringTrim'],
+                    ],
+                    'validators' => [
+                        [
+                            'name'    => 'StringLength',
+                            'options' => [
+                                'encoding' => 'UTF-8',
+                                'min'      => 1,
+                                'max'      => 255,
+                            ],
+                        ],
+                    ],
+                ]
+            );
+
+            $inputFilter->add(
+                [
+                    'name'     => 'category',
+                    'required' => true,
+                    'filters'  => [
+                        ['name' => 'Int'],
+                    ],
+                ]
+            );
+
+
+            $this->inputFilter = $inputFilter;
+        }
+
+        return $this->inputFilter;
+    }
+
 }

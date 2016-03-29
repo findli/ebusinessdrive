@@ -1,0 +1,14 @@
+<?php
+$form->setAttribute('action', $this->url('product', ['action' => 'add']));
+$form->prepare();
+
+echo $this->form()
+          ->openTag($form);
+echo $this->formRow($form->get('name'));
+echo '<br>';
+echo $this->formRow($form->get('category'));
+echo '<br>';
+echo $this->formRow($form->get('csrf'));
+echo $this->formSubmit($form->get('submit'));
+echo $this->form()
+          ->closeTag();

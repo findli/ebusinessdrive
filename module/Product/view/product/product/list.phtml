@@ -1,5 +1,13 @@
 <a class="btn btn-success" href="<?=$this->url('product', ['action' => 'add'])?>">Добавить</a>
 <br>
+<form id="filter-by-category" action="">
+    <?php
+    echo $this->formRow((new \Zend\Form\Element\Select('category'))->setValueOptions($categories)->setLabel("Фильтр: ")->setValue($this->currentCategory));
+    echo "&nbsp;";
+    ?>
+    <button onclick="document.getElementById('filter-by-category').submit()">Применить</button>
+</form>
+<br>
 <div class="row">
 
     <div class="col-md-3">
@@ -30,7 +38,7 @@
         </div>
 
         <div class="col-md-3">
-            <?=$product->category?>
+            <?=$product->category_id->name?>
         </div>
 
         <div class="col-md-3">

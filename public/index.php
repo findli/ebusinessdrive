@@ -5,9 +5,10 @@
  */
 chdir(dirname(__DIR__));
 
-
-error_reporting(E_ALL ^ E_STRICT);
-ini_set("display_errors", 1);
+if (!is_null(getenv('APPLICATION_DEV')) && (getenv('APPLICATION_ENV') == 'dev')) {
+    ini_set("display_errors", 1);
+    error_reporting(E_ALL ^(E_STRICT | E_DEPRECATED));
+}
 
 // Decline static file requests back to the PHP built-in webserver
 if (php_sapi_name() === 'cli-server') {

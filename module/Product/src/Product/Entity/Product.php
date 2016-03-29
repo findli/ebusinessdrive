@@ -3,9 +3,6 @@
 namespace Product\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Zend\InputFilter\InputFilter;
-use Zend\InputFilter\InputFilterAwareInterface;
-use Zend\InputFilter\InputFilterInterface;
 
 /**
  * @ORM\Entity
@@ -13,9 +10,8 @@ use Zend\InputFilter\InputFilterInterface;
  * @property string $name
  * @property int    $id
  * */
-class Product implements InputFilterAwareInterface
+class Product
 {
-    protected $inputFilter;
 
     /**
      * @ORM\Id
@@ -30,9 +26,11 @@ class Product implements InputFilterAwareInterface
     protected $name;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Category")
+     * @ORM\ManyToOne(targetEntity="Category", inversedBy="product")
+     * @ORM\JoinColumn(name="category_id", referencedColumnName="id")
      */
-    private $category;
+    private $category_id;
+
 
     /**
      * Magic getter to expose protected properties.
@@ -71,62 +69,6 @@ class Product implements InputFilterAwareInterface
     public function exchangeArray($data = []) {
         $this->id       = $data['id'];
         $this->name     = $data['name'];
-        $this->category = $data['category'];
-    }
-
-    public function setInputFilter(InputFilterInterface $inputFilter) {
-        throw new \Exception("Not used");
-    }
-
-    public function getInputFilter() {
-        if (!$this->inputFilter) {
-            $inputFilter = new InputFilter();
-
-            $inputFilter->add(
-                [
-                    'name'     => 'id',
-                    'required' => true,
-                    'filters'  => [
-                        ['name' => 'Int'],
-                    ],
-                ]
-            );
-
-            $inputFilter->add(
-                [
-                    'name'       => 'name',
-                    'required'   => true,
-                    'filters'    => [
-                        ['name' => 'StripTags'],
-                        ['name' => 'StringTrim'],
-                    ],
-                    'validators' => [
-                        [
-                            'name'    => 'StringLength',
-                            'options' => [
-                                'encoding' => 'UTF-8',
-                                'min'      => 1,
-                                'max'      => 255,
-                            ],
-                        ],
-                    ],
-                ]
-            );
-
-            $inputFilter->add(
-                [
-                    'name'     => 'category',
-                    'required' => true,
-                    'filters'  => [
-                        ['name' => 'Int'],
-                    ],
-                ]
-            );
-
-
-            $this->inputFilter = $inputFilter;
-        }
-
-        return $this->inputFilter;
+        $this->category_id = $data['category'];
     }
 }

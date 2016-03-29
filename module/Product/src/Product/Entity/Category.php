@@ -2,10 +2,8 @@
 
 namespace Product\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Zend\InputFilter\InputFilter;
-use Zend\InputFilter\InputFilterAwareInterface;
-use Zend\InputFilter\InputFilterInterface;
 
 /**
  * @ORM\Entity
@@ -13,7 +11,7 @@ use Zend\InputFilter\InputFilterInterface;
  * @property string $name
  * @property int    $id
  * */
-class Category implements InputFilterAwareInterface
+class Category
 {
     protected $inputFilter;
 
@@ -30,12 +28,26 @@ class Category implements InputFilterAwareInterface
     protected $name;
 
     /**
+     * @ORM\OneToMany(targetEntity="Product", mappedBy="category")
+     */
+    protected $product;
+
+    /**
+     * Category constructor.
+     */
+    public function __construct()
+    {
+        $this->product = new ArrayCollection();
+    }
+
+    /**
      * Magic getter to expose protected properties.
      *
      * @param string $property
      * @return mixed
      */
-    public function __get($property) {
+    public function __get($property)
+    {
         return $this->$property;
     }
 
@@ -45,8 +57,14 @@ class Category implements InputFilterAwareInterface
      * @param string $property
      * @param mixed  $value
      */
-    public function __set($property, $value) {
+    public function __set($property, $value)
+    {
         $this->$property = $value;
+    }
+
+    public function getSimpleValues()
+    {
+        return [$this->getId() => $this->getName()];
     }
 
     /**
@@ -54,7 +72,8 @@ class Category implements InputFilterAwareInterface
      *
      * @return array
      */
-    public function getArrayCopy() {
+    public function getArrayCopy()
+    {
         return get_object_vars($this);
     }
 
@@ -63,54 +82,10 @@ class Category implements InputFilterAwareInterface
      *
      * @param array $data
      */
-    public function exchangeArray($data = []) {
+    public function exchangeArray($data = [])
+    {
         $this->id   = $data['id'];
         $this->name = $data['name'];
     }
 
-    public function setInputFilter(InputFilterInterface $inputFilter) {
-        throw new \Exception("Not used");
-    }
-
-    public function getInputFilter() {
-        if (!$this->inputFilter) {
-            $inputFilter = new InputFilter();
-
-            $inputFilter->add(
-                [
-                    'name'     => 'id',
-                    'required' => true,
-                    'filters'  => [
-                        ['name' => 'Int'],
-                    ],
-                ]
-            );
-
-            $inputFilter->add(
-                [
-                    'name'       => 'name',
-                    'required'   => true,
-                    'filters'    => [
-                        ['name' => 'StripTags'],
-                        ['name' => 'StringTrim'],
-                    ],
-                    'validators' => [
-                        [
-                            'name'    => 'StringLength',
-                            'options' => [
-                                'encoding' => 'UTF-8',
-                                'min'      => 1,
-                                'max'      => 255,
-                            ],
-                        ],
-                    ],
-                ]
-            );
-
-
-            $this->inputFilter = $inputFilter;
-        }
-
-        return $this->inputFilter;
-    }
 }
